@@ -1,0 +1,51 @@
+CREATE TABLE Products (
+    ProductID INT PRIMARY KEY,
+    ProductName VARCHAR(100),
+    Category VARCHAR(50),
+    Price DECIMAL(10,2),
+    InStock INT,
+    CreatedAt DATETIME
+);
+
+
+--## a. Find the top 5 most expensive products in stock.
+SELECT TOP 5 * FROM Products
+WHERE InStock > 0
+ORDER BY Price DESC;
+
+--##b. Get the total number of products added in the last 30 days.
+SELECT COUNT(*) AS TotalRecentProducts
+FROM Products
+WHERE CreatedAt >= DATEADD(DAY, -30, GETDATE());
+
+--##c. Show average price per category, sorted by highest to lowest.
+SELECT Category, AVG(Price) AS AvgPrice
+FROM Products
+GROUP BY Category
+ORDER BY AvgPrice DESC;
+
+--##Suggest indexes you’d add to improve performance.
+
+CREATE INDEX ix_category_products ON Products(Category);
+CREATE INDEX ix_createdat_products ON Products(CreatedAt);
+
+--##Write a query to check execution plan for the first query using SET SHOWPLAN_ALL.
+SET SHOWPLAN_ALL ON;
+GO
+SELECT TOP 5 * FROM Products
+WHERE InStock > 0
+ORDER BY Price DESC;
+GO
+SET SHOWPLAN_ALL OFF;
+
+--Create a basic script to export this data to a .csv file.
+EXEC xp_cmdshell 'bcp "SELECT * FROM Products" queryout "C:\\exported_products.csv" -c -t, -T -S "Testserver"';
+
+
+
+--Optimizations Suggested:
+--Indexes
+  
+  ix_category_products on Category for efficient grouping.
+  ix_createdat_products on CreatedAt for filtering recent products.
+
